@@ -30,7 +30,7 @@ module	monkey_moveCollision	(
 parameter int INITIAL_X = 280;
 parameter int INITIAL_Y = 185;
 parameter int INITIAL_X_SPEED = 40;
-parameter int INITIAL_JUMP_SPEED = -300;
+parameter int INITIAL_JUMP_SPEED = -500; //absolute value of jump speed
 parameter int MAX_Y_SPEED = 230;
 const int INITIAL_Y_ACCEL=5;
 
@@ -42,7 +42,7 @@ const int	x_FRAME_SIZE	=	639 * FIXED_POINT_MULTIPLIER; // note it must be 2^n
 const int	y_FRAME_SIZE	=	479 * FIXED_POINT_MULTIPLIER;
 const int	bracketOffset =	30;
 const int   OBJECT_WIDTH_X = 64;
-
+const int   HEIGHT_OF_EDGE = 8;
 int Xspeed, topLeftX_FixedPoint; // local parameters 
 int Yspeed, topLeftY_FixedPoint;
 int  Y_ACCEL = 5;
@@ -61,7 +61,7 @@ begin
 		//we have to counteract it in order to be able to change monkey's speed to stay off walls.
 		if (startOfFrame) xflag=1'b0;
 	
-		if (wallCollision && (HitEdgeCode[3]||HitEdgeCode[1]) && !(HitEdgeCode[2]||HitEdgeCode[0])) begin
+		if (wallCollision && (HitEdgeCode==4'b1000||HitEdgeCode==4'b0010)) begin //only side collided with wall
 			xflag=1'b1;
 			if (HitEdgeCode[3])//collision left wall
 					Xspeed <= INITIAL_X_SPEED;
@@ -86,19 +86,26 @@ end
 always_ff@(posedge clk or negedge resetN)
 begin
 	if (!resetN) begin
+		topLeftY_FixedPoint <= INITIAL_Y *FIXED_POINT_MULTIPLIER;
 	end
 	else begin
 	
 		if (jumpIsPressed)//Pressed the jump key
 			jumpFlag <=1;
 			
-		if (wallCollision && HitEdgeCode[0]==1 && !(HitEdgeCode[3]||HitEdgeCode[1])) //collided with floor
+		if (ladderCollision||(wallCollision && (HitEdgeCode==4'b0001||HitEdgeCode==4'b1111))) //collided with floor or rope
+		begin
 			yflag <= 1;
+			Y_ACCEL <= 0;
+			if (!ladderCollision)
+				Yspeed <= (HitEdgeCode==4'b1111)?-HEIGHT_OF_EDGE:0; //if the monkey moved down too much and is "inside" wall, push him slightly up
+			else Yspeed <=0;
+		end
 	
 		if (!yflag) begin //if we haven't hit the floor
 			Y_ACCEL<= INITIAL_Y_ACCEL;
 			
-			if(wallCollision && HitEdgeCode[2]==1 && !(HitEdgeCode[3]||HitEdgeCode[1]))
+			if(wallCollision && HitEdgeCode == 4'b0100)
 				Yspeed <= 10; //Hit top edge, 10 speed is just so the monkey can start falling
 		end
 		
@@ -107,15 +114,12 @@ begin
 				Yspeed <= INITIAL_JUMP_SPEED;
 				Y_ACCEL<= INITIAL_Y_ACCEL;
 			end
-			else begin
-				Yspeed <= 0;
-				Y_ACCEL <= 0;
-			end
 		end
 	
 		if (startOfFrame == 1'b1) begin
-			if (Yspeed < MAX_Y_SPEED && !yflag) //  limit the spped while going down 
-					Yspeed <= Yspeed + Y_ACCEL ; // deAccelerate : slow the speed down every clock tic
+			topLeftY_FixedPoint <= topLeftY_FixedPoint + Yspeed; //Change is done here because it glitched out sometimes
+			if (Yspeed < MAX_Y_SPEED) //  limit the speed while going down 
+				Yspeed <= Yspeed + Y_ACCEL; // deAccelerate : slow the speed down every clock tic
 			yflag <= 0;
 			jumpFlag <=0;
 		end
@@ -133,7 +137,6 @@ begin
 	begin
 		//Xspeed	<= INITIAL_X_SPEED;
 		topLeftX_FixedPoint	<= INITIAL_X * FIXED_POINT_MULTIPLIER;
-		topLeftY_FixedPoint <= INITIAL_Y *FIXED_POINT_MULTIPLIER;
 	end
 	else begin
 		   
@@ -141,8 +144,6 @@ begin
 		if (startOfFrame == 1'b1 )//&& Yspeed != 0) 
 		begin
 			topLeftX_FixedPoint <= topLeftX_FixedPoint + Xspeed;
-			if (!yflag)
-				topLeftY_FixedPoint <= topLeftY_FixedPoint + Yspeed;
 		end
 					
 	end
