@@ -1700,6 +1700,11 @@ agreement for further details.
 	(pt 544 504)
 	(pt 424 504)
 )
+(connector
+	(text "RopeDrawingRequest" (rect 434 680 536 697)(font "Intel Clear" ))
+	(pt 544 696)
+	(pt 424 696)
+)
 (junction (pt 552 944))
 (text "Sound Unit" (rect 496 784 562 803)(font "Intel Clear" (font_size 8)))
 (text "Output to 7Seg" (rect 912 928 1002 947)(font "Intel Clear" (font_size 8)))

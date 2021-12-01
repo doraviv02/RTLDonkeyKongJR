@@ -99,7 +99,15 @@ begin
 			Y_ACCEL <= 0;
 			if (!ladderCollision)
 				Yspeed <= (HitEdgeCode==4'b1111)?-HEIGHT_OF_EDGE:0; //if the monkey moved down too much and is "inside" wall, push him slightly up
-			else Yspeed <=0;
+			else begin //we are on the rope
+				if (digitIsPressed) begin
+					if (digit==2) //pressing down
+						Yspeed <= 60;
+					else if (digit==8) //pressing up
+						Yspeed <= -60;
+				end
+				else Yspeed <=0;
+			end
 		end
 	
 		if (!yflag) begin //if we haven't hit the floor
