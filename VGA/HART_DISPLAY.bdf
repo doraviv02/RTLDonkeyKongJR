@@ -112,7 +112,7 @@ agreement for further details.
 	(input)
 	(rect 456 352 624 368)
 	(text "INPUT" (rect 125 0 153 10)(font "Arial" (font_size 6)))
-	(text "clk" (rect 5 0 20 12)(font "Arial" ))
+	(text "clk" (rect 5 0 19 12)(font "Arial" ))
 	(pt 168 8)
 	(drawing
 		(line (pt 84 12)(pt 109 12))
@@ -221,6 +221,34 @@ agreement for further details.
 	)
 )
 (symbol
+	(rect 424 432 536 480)
+	(text "matrix_top_XY" (rect 15 0 114 16)(font "Arial" (font_size 10)))
+	(text "inst" (rect 8 32 25 44)(font "Arial" ))
+	(port
+		(pt 112 24)
+		(output)
+		(text "result[10..0]" (rect 0 0 67 14)(font "Arial" (font_size 8)))
+		(text "32" (rect 81 17 95 31)(font "Arial" (font_size 8)))
+		(line (pt 112 24)(pt 96 24)(line_width 3))
+	)
+	(drawing
+		(text "11" (rect 95 26 106 38)(font "Arial" ))
+		(line (pt 106 20)(pt 98 28))
+		(line (pt 16 16)(pt 16 32))
+		(line (pt 16 16)(pt 96 16))
+		(line (pt 16 32)(pt 96 32))
+		(line (pt 96 16)(pt 96 32))
+		(line (pt 0 0)(pt 114 0))
+		(line (pt 114 0)(pt 114 50))
+		(line (pt 0 50)(pt 114 50))
+		(line (pt 0 0)(pt 0 50))
+		(line (pt 0 0)(pt 0 0))
+		(line (pt 0 0)(pt 0 0))
+		(line (pt 0 0)(pt 0 0))
+		(line (pt 0 0)(pt 0 0))
+	)
+)
+(symbol
 	(rect 776 328 1000 472)
 	(text "square_object" (rect 5 0 73 12)(font "Arial" ))
 	(text "inst11" (rect 8 128 36 145)(font "Intel Clear" ))
@@ -296,12 +324,12 @@ agreement for further details.
 	)
 	(parameter
 		"OBJECT_WIDTH_X"
-		"577"
+		"640"
 		""
 		(type "PARAMETER_SIGNED_DEC")	)
 	(parameter
 		"OBJECT_HEIGHT_Y"
-		"417"
+		"480"
 		""
 		(type "PARAMETER_SIGNED_DEC")	)
 	(parameter
@@ -313,34 +341,6 @@ agreement for further details.
 		(rectangle (rect 16 16 208 128))
 	)
 	(annotation_block (parameter)(rect 752 216 1007 292))
-)
-(symbol
-	(rect 424 432 536 480)
-	(text "matrix_top_XY" (rect 15 0 114 16)(font "Arial" (font_size 10)))
-	(text "inst" (rect 8 32 25 44)(font "Arial" ))
-	(port
-		(pt 112 24)
-		(output)
-		(text "result[10..0]" (rect 0 0 67 14)(font "Arial" (font_size 8)))
-		(text "32" (rect 81 17 95 31)(font "Arial" (font_size 8)))
-		(line (pt 112 24)(pt 96 24)(line_width 3))
-	)
-	(drawing
-		(text "11" (rect 95 26 106 38)(font "Arial" ))
-		(line (pt 106 20)(pt 98 28))
-		(line (pt 16 16)(pt 16 32))
-		(line (pt 16 16)(pt 96 16))
-		(line (pt 16 32)(pt 96 32))
-		(line (pt 96 16)(pt 96 32))
-		(line (pt 0 0)(pt 114 0))
-		(line (pt 114 0)(pt 114 50))
-		(line (pt 0 50)(pt 114 50))
-		(line (pt 0 0)(pt 0 50))
-		(line (pt 0 0)(pt 0 0))
-		(line (pt 0 0)(pt 0 0))
-		(line (pt 0 0)(pt 0 0))
-		(line (pt 0 0)(pt 0 0))
-	)
 )
 (connector
 	(text "resetN" (rect 1218 328 1248 345)(font "Intel Clear" ))

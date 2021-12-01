@@ -32,7 +32,7 @@ parameter int INITIAL_Y = 185;
 parameter int INITIAL_X_SPEED = 40;
 parameter int INITIAL_JUMP_SPEED = -300;
 parameter int MAX_Y_SPEED = 230;
-const int  Y_ACCEL = 5;
+const int INITIAL_Y_ACCEL=5;
 
 const int	FIXED_POINT_MULTIPLIER	=	64;
 // FIXED_POINT_MULTIPLIER is used to enable working with integers in high resolution so that 
@@ -45,10 +45,11 @@ const int   OBJECT_WIDTH_X = 64;
 
 int Xspeed, topLeftX_FixedPoint; // local parameters 
 int Yspeed, topLeftY_FixedPoint;
+int  Y_ACCEL = 5;
 
 logic xflag;
 logic yflag;
-logic jumpFlag=1'b0;
+logic jumpFlag;
 
 // Moving left or right
 always_ff@(posedge clk or negedge resetN)
@@ -62,9 +63,9 @@ begin
 	
 		if (wallCollision && (HitEdgeCode[3]||HitEdgeCode[1]) && !(HitEdgeCode[2]||HitEdgeCode[0])) begin
 			xflag=1'b1;
-			if (HitEdgeCode[3]==1)//collision left wall
+			if (HitEdgeCode[3])//collision left wall
 					Xspeed <= INITIAL_X_SPEED;
-				else if (HitEdgeCode[1]==1) //collision right wall
+				else if (HitEdgeCode[1]) //collision right wall
 					Xspeed <= INITIAL_X_SPEED*-1;
 		end
 	
@@ -87,32 +88,38 @@ begin
 	if (!resetN) begin
 	end
 	else begin
-		
-		if (ladderCollision || !yflag) begin
-			yflag <= 1;
-			Yspeed <= 0;
-			jumpFlag <= 0;
-		end
-		else if(wallCollision && HitEdgeCode[2]==1 && (HitEdgeCode[3]==0 && HitEdgeCode[1]==0))
-			Yspeed <= 10; //Hit top edge, -10 speed is just so the monkey can start falling
-		
-		else begin
-			if(jumpIsPressed && jumpFlag!=1) begin
-				jumpFlag <= 1'b1;
-				Yspeed <= INITIAL_JUMP_SPEED; //Pressed the jump key
-			end
+	
+		if (jumpIsPressed)//Pressed the jump key
+			jumpFlag <=1;
 			
-			else if (wallCollision && HitEdgeCode[0]==1 && !(HitEdgeCode[3]||HitEdgeCode[1])) begin
-				Yspeed <= -20; //Hit bottom edge and didn't press jump, stay at same place.
-				jumpFlag <= 1'b0;
-			end
+		if (wallCollision && HitEdgeCode[0]==1 && !(HitEdgeCode[3]||HitEdgeCode[1])) //collided with floor
+			yflag <= 1;
+	
+		if (!yflag) begin //if we haven't hit the floor
+			Y_ACCEL<= INITIAL_Y_ACCEL;
+			
+			if(wallCollision && HitEdgeCode[2]==1 && !(HitEdgeCode[3]||HitEdgeCode[1]))
+				Yspeed <= 10; //Hit top edge, 10 speed is just so the monkey can start falling
 		end
 		
-		if (startOfFrame == 1'b1) begin
-			yflag <= 0;
-			if (Yspeed < MAX_Y_SPEED ) //  limit the spped while going down 
-				Yspeed <= Yspeed + Y_ACCEL ; // deAccelerate : slow the speed down every clock tic
+		else begin //touched the floor this frame
+			if (jumpFlag) begin//On the floor and pressed the jump key this frame
+				Yspeed <= INITIAL_JUMP_SPEED;
+				Y_ACCEL<= INITIAL_Y_ACCEL;
+			end
+			else begin
+				Yspeed <= 0;
+				Y_ACCEL <= 0;
+			end
 		end
+	
+		if (startOfFrame == 1'b1) begin
+			if (Yspeed < MAX_Y_SPEED && !yflag) //  limit the spped while going down 
+					Yspeed <= Yspeed + Y_ACCEL ; // deAccelerate : slow the speed down every clock tic
+			yflag <= 0;
+			jumpFlag <=0;
+		end
+		
 	end
 end
 
@@ -129,23 +136,13 @@ begin
 		topLeftY_FixedPoint <= INITIAL_Y *FIXED_POINT_MULTIPLIER;
 	end
 	else begin
-				
-	// collisions with the sides 			
-				//if (collision && HitEdgeCode [3] == 1) begin  
-					//if (Xspeed < 0 ); // while moving left
-							//Xspeed <= -Xspeed ; // positive move right 
-				//end
-			
-				//if (collision && HitEdgeCode [1] == 1 ) begin  // hit right border of brick  
-					//if (Xspeed > 0 ); //  while moving right
-							//Xspeed <= -Xspeed  ;  // negative move left    
-				//end	
 		   
 			
 		if (startOfFrame == 1'b1 )//&& Yspeed != 0) 
 		begin
 			topLeftX_FixedPoint <= topLeftX_FixedPoint + Xspeed;
-			topLeftY_FixedPoint <= topLeftY_FixedPoint + Yspeed;
+			if (!yflag)
+				topLeftY_FixedPoint <= topLeftY_FixedPoint + Yspeed;
 		end
 					
 	end

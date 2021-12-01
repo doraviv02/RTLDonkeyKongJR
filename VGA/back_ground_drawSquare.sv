@@ -13,8 +13,8 @@ module	back_ground_drawSquare	(
 					output	logic		boardersDrawReq 
 );
 
-const int	xFrameSize	=	635;
-const int	yFrameSize	=	475;
+const int	xFrameSize	=	640;
+const int	yFrameSize	=	480;
 const int	bracketOffset =	30;
 const int   COLOR_MARTIX_SIZE  = 16*8 ; // 128 
 
@@ -70,52 +70,16 @@ begin
 				greenBits <= DARK_COLOR ;	
 				blueBits <= LIGHT_COLOR ;	// 3rd bit will be truncked
 			end
-		// draw  four lines with "bracketOffset" offset from the border 
-		
-		if (        pixelX == bracketOffset ||
-						pixelY == bracketOffset ||
-						pixelX == (xFrameSize-bracketOffset) || 
-						pixelY == (yFrameSize-bracketOffset)) 
-			begin 
-					redBits <= DARK_COLOR ;	
-					greenBits <= DARK_COLOR  ;	
-					blueBits <= DARK_COLOR ;
-					boardersDrawReq <= 	1'b1 ; // pulse if drawing the boarders 
-			end
-	
-	// note numbers can be used inline if they appear only once 
-
 
 	
 	// 3.  draw red rectangle at the bottom right,  green on the left, and blue on top left 
 	//-------------------------------------------------------------------------------------
 		
-		if (pixelX > RED_TOP_Y && pixelY >= RED_LEFT_X ) // rectangles on part of the screen 
-				redBits <= DARK_COLOR ; 
+		if (pixelX > 0 && pixelY > 0 ) // rectangles on part of the screen 
+				redBits <= DARK_COLOR ;	
+				greenBits <= DARK_COLOR ;	
+				blueBits <= LIGHT_COLOR ;
 				 
-	
-		if (GREEN_RIGHT_X <  32  ) 
-				greenBits <= 3'b011 ; 
-						
-		if (pixelX <  BLUE_RIGHT_X && pixelY < BLUE_BOTTOM_Y )   
-					blueBits <= 2'b10  ; 
-
-				
-
-	// 4. draw a matrix of 16*16 rectangles with all the colors, each rectsangle 8*8 pixels  	
-   // ---------------------------------------------------------------------------------------
-
-// 		if ((pixelX > 32)  && (pixelX < 160) && ( pixelY > 32) && (pixelY < 160))  begin
-		if ((pixelX > COLOR_MATRIX_LEFT_X)  && (pixelX < COLOR_MATRIX_LEFT_X + COLOR_MARTIX_SIZE) 
-		&& ( pixelY > COLOR_MATRIX_TOP_Y) && (pixelY < COLOR_MATRIX_TOP_Y + COLOR_MARTIX_SIZE )) 
-		begin
-			redBits <= pixelX[5:3] ; 
-			greenBits <= pixelY[5:3] ; 
-			blueBits <= { pixelX[6] , pixelY[6]} ; 
-
-
-	          
-		end	
 
 		
 	BG_RGB =  {redBits , greenBits , blueBits} ; //collect color nibbles to an 8 bit word 
@@ -125,4 +89,3 @@ begin
 	end; 	
 end 
 endmodule
-
