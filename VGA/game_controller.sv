@@ -10,21 +10,21 @@ module	game_controller	(
 			input	logic	startOfFrame,  // short pulse every start of frame 30Hz 
 			input	logic	drawing_request_Ball,
 			input	logic	drawing_request_1,
-			input logic drawing_request_2,
+			input logic [4:0] drawing_request_Fruit,
 			input logic drawing_request_Rope,
 			
 			output logic wallCollision, // active in case of collision between two objects
 			output logic ropeCollision, // active in case of collision between monkey and rope
-			output logic SingleHitPulse // critical code, generating A single pulse in a frame 
+			output logic [4:0] fruitCollision //active in case of collision between monkey and fruit
 );
 
 // drawing_request_Ball   -->  smiley
 // drawing_request_1      -->  brackets
 // drawing_request_2      -->  number/box 
 
-assign colision_smiley_number = (drawing_request_Ball &&  drawing_request_2);
+assign fruitCollision = drawing_request_Ball & drawing_request_Fruit;
 
-assign wallCollision = ( (drawing_request_Ball &&  drawing_request_1)|| colision_smiley_number);// any collision 
+assign wallCollision = (drawing_request_Ball &&  drawing_request_1);// collision between monkey and walls
 assign ropeCollision = (drawing_request_Ball &&  drawing_request_Rope); // collision with monkey and rope
 
 
@@ -35,20 +35,14 @@ begin
 	if(!resetN)
 	begin 
 		flag	<= 1'b0;
-		SingleHitPulse <= 1'b0 ; 
 	end 
 	else begin 
-
-			SingleHitPulse <= 1'b0 ; // default 
 			if(startOfFrame) 
 				flag = 1'b0 ; // reset for next time 
 				
-//		change the section below  to collision between number and smiley
-
 
 if ( wallCollision  && (flag == 1'b0)) begin 
 			flag	<= 1'b1; // to enter only once 
-			if (colision_smiley_number) SingleHitPulse <= 1'b1 ; 
 		end
 	end 
 end

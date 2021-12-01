@@ -1,64 +1,68 @@
-module	Fruit	(	
+module	Fruit(	
  
 					input	logic	clk,
 					input	logic	resetN,
 					input	logic	startOfFrame,  // short pulse every start of frame 30Hz 
-					input logic illegalPlacement,  //collision if smiley hits an object
-					input logic monkeyCollision,
-					input	logic	[3:0] HitEdgeCode, //one bit per edge 
-					input logic [10:0] randomX,
-					input logic [10:0] randomY,
+					input logic [4:0] monkeyCollision, //checks collisions with every single fruit
+					input logic [10:0] random_X, //random X placement given as an input
 
-					output	 logic signed 	[10:0]	topLeftX, // output the top left corner 
-					output	 logic signed	[10:0]	topLeftY,  // can be negative , if the object is partliy outside
-					output 	 logic drawFruit //decides on whether we have to draw the fruit or not
-	
+					output	 logic signed 	[4:0][10:0]	topLeftX, // output the top left corner 
+					output	 logic signed	[4:0][10:0]	topLeftY,  // can be negative , if the object is partliy outside
+					output 	 logic [4:0] drawFruit, //decides on whether we have to draw the fruit or not
+					output 	 int fruitChoice[4:0]
 );
 
-
-  
-
-const int	FIXED_POINT_MULTIPLIER	=	64;
-// FIXED_POINT_MULTIPLIER is used to enable working with integers in high resolution so that 
-// we do all calculations with topLeftX_FixedPoint to get a resolution of 1/64 pixel in calcuatuions,
-// we devide at the end by FIXED_POINT_MULTIPLIER which must be 2^n, to return to the initial proportions
-const int	x_FRAME_SIZE	=	639 * FIXED_POINT_MULTIPLIER; // note it must be 2^n 
-const int	y_FRAME_SIZE	=	479 * FIXED_POINT_MULTIPLIER;
+const int	x_FRAME_SIZE	=	639;
+const int	y_FRAME_SIZE	=	479;
 const int	bracketOffset =	30;
-const int   OBJECT_WIDTH_X = 64;
-const int   OBJECT_WIDTH_Y = 64;
+const int   FRUIT_WIDTH = 32;
+const int   FRUIT_HEIGHT = 32;
 
-logic eaten;
-int topLeftX_FixedPoint; // local parameters 
-int topLeftY_FixedPoint; 
+const int   NUM_OF_FRUITS = 5;
+const logic[10:0]   Y_PLACEMENTS[4:0] = '{160,180,200,220,240};
+
+parameter int choiceOrder[4:0] = '{0,1,2,3,4}; //for each fruit we decide which 
+
+int Unfixed_X = 5;
+logic [10:0] X_PLACEMENTS[4:0];
+logic [4:0] eaten;
 
 //////////--------------------------------------------------------------------------------------------------------------=
 //  checks collision
 
 always_ff@(posedge clk or negedge resetN)
 begin
-	eaten <= 1'b1;
 	if(!resetN)
 	begin
-		eaten <= 1'b0;
-		topLeftX_FixedPoint	<= randomX * FIXED_POINT_MULTIPLIER;
-		topLeftY_FixedPoint	<= randomY * FIXED_POINT_MULTIPLIER;
+		eaten <= '{default:0};
+		X_PLACEMENTS <= '{default:0};
+		Unfixed_X <= 5;
 	end
 	else begin
-		if(illegalPlacement) begin
-			eaten <= 1'b0;
-			topLeftX_FixedPoint	<= randomX * FIXED_POINT_MULTIPLIER;
-			topLeftY_FixedPoint	<= randomY * FIXED_POINT_MULTIPLIER;
+	
+		if (startOfFrame) begin
+			if (Unfixed_X>0) begin //if we havent fixed X location we set it in the first 5 frames.
+				Unfixed_X<= Unfixed_X-1;
+				X_PLACEMENTS[Unfixed_X-1]<= random_X;
+				eaten[Unfixed_X-1] <= 0;
+			end
+			else begin
+				for (int i=0; i<NUM_OF_FRUITS; i= i+1) begin
+					topLeftX[i] <= X_PLACEMENTS[i];
+					topLeftY[i] <= Y_PLACEMENTS[i];
+					drawFruit[i] <= !eaten[i];
+				end
+			end
 		end
-		else if(monkeyCollision) begin
-			eaten <= 1'b0;
+		
+		for (int i=0;i<NUM_OF_FRUITS; i = i+1) begin
+			if (monkeyCollision[i] == 1)
+				eaten[i] <= 1;
 		end
+		
 	end
 end
 
-//get a better (64 times) resolution using integer   
-assign 	topLeftX = topLeftX_FixedPoint / FIXED_POINT_MULTIPLIER ;   // note it must be 2^n 
-assign 	topLeftY = topLeftY_FixedPoint / FIXED_POINT_MULTIPLIER ;   
-assign   drawFruit = eaten;
+assign fruitChoice = choiceOrder;
 
 endmodule

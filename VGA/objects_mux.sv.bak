@@ -24,14 +24,9 @@ module	objects_mux	(
 					input    logic HartDrawingRequest, // box of numbers
 					input		logic	[7:0] hartRGB,   
 					input		logic	[7:0] backGroundRGB, 
-					
-		  // fruit
-					input		logic [4:0] fruitDrawingRequest,
-					input		logic [4:0][7:0] fruitRGB,
 			  
 				   output	logic	[7:0] RGBOut
 );
-const int NUM_OF_FRUITS = 5;
 
 always_ff@(posedge clk or negedge resetN)
 begin
@@ -48,12 +43,6 @@ begin
 		 
 		 else if (boxDrawingRequest == 1'b1  )
 			RGBOut <= boxRGB;
-				else if (fruitDrawingRequest>0) begin //if trying to print at least 1 fruit
-					for (int i=0;i<NUM_OF_FRUITS;i=i+1) begin
-						if (fruitDrawingRequest[i] == 1)
-							RGBOut <= fruitRGB[i];
-					end
-				end
 				else if (HartDrawingRequest == 1'b1)
 						RGBOut <= hartRGB;
 						else 
