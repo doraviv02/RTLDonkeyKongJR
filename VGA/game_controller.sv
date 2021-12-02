@@ -22,7 +22,7 @@ module	game_controller	(
 // drawing_request_1      -->  brackets
 // drawing_request_2      -->  number/box 
 
-assign fruitCollision = drawing_request_Ball & drawing_request_Fruit;
+assign fruitCollision = drawing_request_Ball? drawing_request_Fruit:0;
 
 assign wallCollision = (drawing_request_Ball &&  drawing_request_1);// collision between monkey and walls
 assign ropeCollision = (drawing_request_Ball &&  drawing_request_Rope); // collision with monkey and rope

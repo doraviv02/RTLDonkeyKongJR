@@ -50,6 +50,7 @@ int  Y_ACCEL = 5;
 logic xflag;
 logic yflag;
 logic jumpFlag;
+logic onRope;
 
 // Moving left or right
 always_ff@(posedge clk or negedge resetN)
@@ -97,9 +98,11 @@ begin
 		begin
 			yflag <= 1;
 			Y_ACCEL <= 0;
-			if (!ladderCollision)
+			if (!ladderCollision) begin
 				Yspeed <= (HitEdgeCode==4'b1111)?-HEIGHT_OF_EDGE:0; //if the monkey moved down too much and is "inside" wall, push him slightly up
+			end
 			else begin //we are on the rope
+				onRope <=1;
 				if (digitIsPressed) begin
 					if (digit==2) //pressing down
 						Yspeed <= 60;
@@ -118,7 +121,7 @@ begin
 		end
 		
 		else begin //touched the floor this frame
-			if (jumpFlag) begin//On the floor and pressed the jump key this frame
+			if (jumpFlag && !onRope) begin//On the floor and pressed the jump key this frame
 				Yspeed <= INITIAL_JUMP_SPEED;
 				Y_ACCEL<= INITIAL_Y_ACCEL;
 			end
@@ -130,6 +133,7 @@ begin
 				Yspeed <= Yspeed + Y_ACCEL; // deAccelerate : slow the speed down every clock tic
 			yflag <= 0;
 			jumpFlag <=0;
+			onRope <= 0;
 		end
 		
 	end
